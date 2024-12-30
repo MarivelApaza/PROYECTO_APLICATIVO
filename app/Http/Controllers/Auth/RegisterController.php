@@ -75,4 +75,13 @@ class RegisterController extends Controller
             'roles_id' => $data['roles_id'], // Asignar el rol
         ]);
     }
+
+    public function index()
+    {
+        // Obtener todos los usuarios
+        $usuarios = User::all();
+
+        // Retornar la vista con los usuarios
+        return view('usuarios.index', compact('usuarios'));
+    }
 }

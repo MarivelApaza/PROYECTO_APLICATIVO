@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('ventas', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('cliente_id');
-            $table->unsignedBigInteger('proveedor_id');
             $table->unsignedBigInteger('tipo_articulo_id');
             $table->dateTime('fecha_hora');
             $table->decimal('total', 10, 2);

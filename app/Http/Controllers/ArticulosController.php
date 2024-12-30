@@ -121,4 +121,24 @@ class ArticulosController extends Controller
         return redirect()->route('articulos.index')->with('success', 'Artículo eliminado con éxito');
     }
 
+    public function consultaArticulo(Request $request)
+{
+    // Obtener el término de búsqueda
+    $termino = $request->input('termino');
+
+    // Realizar la consulta de artículos según el término de búsqueda
+    $articulos = Articulos::where('descripcion', 'like', "%$termino%")
+                         ->orWhere('precio_venta', 'like', "%$termino%")
+                         ->orWhere('precio_costo', 'like', "%$termino%")
+                         ->orWhere('stock', 'like', "%$termino%")
+                         ->orWhereHas('proveedor', function($query) use ($termino) {
+                             $query->where('proveedor', 'like', "%$termino%");  // Asegúrate de que 'nombre' sea la columna correcta en 'proveedores'
+                         })
+                         ->get();
+
+    // Retornar la vista 'consultaarticulo' con los resultados
+    return view('articulos.consultaarticulos', compact('articulos'));
+}
+
+
 }

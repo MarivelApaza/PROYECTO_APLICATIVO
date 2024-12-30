@@ -41,7 +41,8 @@ class Articulos extends Model
     public function venta()
     {
         
-            return $this->belongsToMany(Ventas::class, 'venta_producto', 'producto_id', 'venta_id');
+        return $this->belongsToMany(Ventas::class, 'detalle_ventas', 'producto_id', 'venta_id')
+        ->withPivot('cantidad', 'precio', 'precio_total');
         
     }
 

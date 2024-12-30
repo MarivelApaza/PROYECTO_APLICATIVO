@@ -114,4 +114,23 @@ class ClienteController extends Controller
         return redirect()->route('clientes.index')->with('success', 'Cliente eliminado exitosamente');
     }
 
+
+  
+        public function consultaCliente(Request $request)
+    {
+        // Obtener el término de búsqueda desde el input
+        $termino = $request->input('termino');
+
+        // Realizar la consulta de clientes según el término de búsqueda
+        $clientes = Cliente::where('nombre', 'like', "%$termino%")
+                           ->orWhere('apellidos', 'like', "%$termino%")
+                           ->orWhere('tipo_documento', 'like', "%$termino%")
+                           ->orWhere('num_documento', 'like', "%$termino%")
+                           ->orWhere('telefono', 'like', "%$termino%")
+                           ->orWhere('ciudad', 'like', "%$termino%")
+                           ->get();
+
+        // Retornar la vista 'consultacliente' y pasar los datos encontrados
+        return view('clientes.consultacliente', compact('clientes'));
+    }
 }

@@ -2,24 +2,36 @@
 
 @section('content')
 <div class="container">
-    <h2>Crear Venta</h2>
+    <h2>Editar Venta</h2>
 
-    <form action="{{ route('ventas.store') }}" method="POST" id="formVenta">
+    <form action="{{ route('ventas.update', $venta->id) }}" method="POST" id="formVenta">
         @csrf
+        @method('PUT')
         
         <div class="mb-3">
             <label for="cliente_id" class="form-label">Cliente</label>
             <select name="cliente_id" id="cliente_id" class="form-control" required>
                 <option value="">Selecciona un cliente</option>
                 @foreach($clientes as $cliente)
-                    <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
+                    <option value="{{ $cliente->id }}" {{ $venta->cliente_id == $cliente->id ? 'selected' : '' }}>
+                        {{ $cliente->nombre }}
+                    </option>
                 @endforeach
             </select>
         </div>
 
         <div class="mb-3">
-            <label for="fecha_hora" class="form-label">Fecha y Hora de Venta</label>
-            <input type="datetime-local" name="fecha_hora" id="fecha_hora" class="form-control" required>
+            <label for="fecha" class="form-label">Fecha de Venta</label>
+            <input type="date" name="fecha" id="fecha" class="form-control" value="{{ $venta->fecha }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select name="estado" id="estado" class="form-control" required>
+                <option value="pendiente" {{ $venta->estado == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                <option value="completado" {{ $venta->estado == 'completado' ? 'selected' : '' }}>Completado</option>
+                <option value="cancelado" {{ $venta->estado == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+            </select>
         </div>
 
         <div class="mb-3">
@@ -34,27 +46,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                <tr class="productoItem">
-            <td>
-                <select name="detalle_ventas[0][producto_id]" class="form-control" required>
-                    <option value="">Selecciona un producto</option>
-                    @foreach($productos as $producto)
-                        <option value="{{ $producto->id }}" data-precio="{{ $producto->precio_venta }}">
-                            {{ $producto->descripcion }}
-                        </option>
-                    @endforeach
-                </select>
-            </td>
+                    @foreach($venta->productos as $index => $producto)
+                    <tr class="productoItem">
                         <td>
-                            <input type="number" name="detalle_ventas[0][cantidad]" class="form-control cantidad" min="1" value="1" required>
+                            <select name="articulos[{{ $index }}][producto_id]" class="form-control" required>
+                                <option value="">Selecciona un producto</option>
+                                @foreach($productos as $prod)
+                                    <option value="{{ $prod->id }}" data-precio="{{ $prod->precio_venta }}" 
+                                        {{ $producto->id == $prod->id ? 'selected' : '' }}>
+                                        {{ $prod->descripcion }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </td>
                         <td>
-                            <input type="text" name="detalle_ventas[0][precio_total]" class="form-control precio_total" readonly>
+                            <input type="number" name="articulos[{{ $index }}][cantidad]" class="form-control cantidad" min="1" value="{{ $producto->pivot->cantidad }}" required>
+                        </td>
+                        <td>
+                            <input type="text" name="articulos[{{ $index }}][precio_total]" class="form-control precio_total" value="{{ number_format($producto->pivot->precio_total, 2) }}" readonly>
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
                         </td>
                     </tr>
+                    @endforeach
                 </tbody>
             </table>
             <button type="button" class="btn btn-primary mt-2" id="agregarProducto">Agregar Producto</button>
@@ -62,40 +77,20 @@
 
         <div class="mb-3">
             <label for="subtotal" class="form-label">Subtotal</label>
-            <input type="text" id="subtotal" class="form-control" name="subtotal" readonly>
+            <input type="text" id="subtotal" class="form-control" name="subtotal" value="{{ number_format($venta->subtotal, 2) }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="igv" class="form-label">IGV (18%)</label>
-            <input type="text" id="igv" class="form-control" name="igv" readonly>
+            <input type="text" id="igv" class="form-control" name="igv" value="{{ number_format($venta->igv, 2) }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="total" class="form-label">Total</label>
-            <input type="text" id="total" class="form-control" name="total" readonly>
+            <input type="text" id="total" class="form-control" name="total" value="{{ number_format($venta->total, 2) }}" readonly>
         </div>
 
-        <div class="mb-3">
-            <label for="proveedor_id" class="form-label">Proveedor</label>
-            <select name="proveedor_id" id="proveedor_id" class="form-control" required>
-                <option value="">Selecciona un proveedor</option>
-                @foreach($proveedores as $proveedor)
-                    <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="tipo_articulo_id" class="form-label">Tipo de Artículo</label>
-            <select name="tipo_articulo_id" id="tipo_articulo_id" class="form-control" required>
-                <option value="">Selecciona un tipo de artículo</option>
-                @foreach($tipoArticulos as $tipoArticulo)
-                    <option value="{{ $tipoArticulo->id }}">{{ $tipoArticulo->descripcion }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-success">Guardar Venta</button>
+        <button type="submit" class="btn btn-success">Actualizar Venta</button>
     </form>
 </div>
 
@@ -122,20 +117,20 @@
 
             // Agregar contenido a las celdas
             celdaProducto.innerHTML = `
-                <select name="detalle_ventas[${productoCount}][producto_id]" class="form-control" required>
+                <select name="articulos[${productoCount}][producto_id]" class="form-control" required>
                     <option value="">Selecciona un producto</option>
-                    @foreach($articulos as $articulo)
-                        <option value="{{ $articulo->id }}" data-precio="{{ $articulo->precio_venta }}">
-                            {{ $articulo->descripcion }}
+                    @foreach($productos as $producto)
+                        <option value="{{ $producto->id }}" data-precio="{{ $producto->precio_venta }}">
+                            {{ $producto->descripcion }}
                         </option>
                     @endforeach
                 </select>
             `;
             celdaCantidad.innerHTML = `
-                <input type="number" name="detalle_ventas[${productoCount}][cantidad]" class="form-control cantidad" min="1" value="1" required>
+                <input type="number" name="articulos[${productoCount}][cantidad]" class="form-control cantidad" min="1" value="1" required>
             `;
             celdaTotal.innerHTML = `
-                <input type="text" name="detalle_ventas[${productoCount}][precio_total]" class="form-control precio_total" readonly>
+                <input type="text" name="articulos[${productoCount}][precio_total]" class="form-control precio_total" readonly>
             `;
             celdaAcciones.innerHTML = `
                 <button type="button" class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
@@ -166,7 +161,7 @@
 
             let precioTotales = document.querySelectorAll('.precio_total');
             let cantidades = document.querySelectorAll('.cantidad');
-            let productos = document.querySelectorAll('select[name^="detalle_ventas"]');
+            let productos = document.querySelectorAll('select[name^="articulos"]');
 
             productos.forEach((producto, index) => {
                 let precio = parseFloat(producto.selectedOptions[0].getAttribute('data-precio') || 0);
@@ -190,7 +185,7 @@
 
         // Actualizar los totales cuando cambie la cantidad o el producto
         document.addEventListener('change', function(event) {
-            if (event.target.classList.contains('cantidad') || event.target.matches('select[name^="detalle_ventas"]')) {
+            if (event.target.classList.contains('cantidad') || event.target.matches('select[name^="articulos"]')) {
                 actualizarTotales();
             }
         });

@@ -21,6 +21,15 @@
             <label for="fecha" class="form-label">Fecha de Venta</label>
             <input type="date" name="fecha" id="fecha" class="form-control" required>
         </div>
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select name="estado" id="estado" class="form-control" required>
+            <option value="pendiente" {{ old('estado', 'pendiente') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+            <option value="completado" {{ old('estado') == 'completado' ? 'selected' : '' }}>Completado</option>
+            <option value="cancelado" {{ old('estado') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+
+            </select>
+        </div>
 
         <div class="mb-3">
             <h4>Artículos</h4>
@@ -76,6 +85,7 @@
         </div>
 
         <button type="submit" class="btn btn-success">Guardar Venta</button>
+
     </form>
 </div>
 

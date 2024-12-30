@@ -6,6 +6,8 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ArticulosController;
 use App\Http\Controllers\ProveedoresController;
 use App\Http\Controllers\VentasController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\TipoArticulosController;
 
 /*
@@ -28,6 +30,13 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+    // Otras rutas, como crear, editar, eliminar, etc.
+});
+
+
 Route::resource('ventas', VentasController::class);
 Route::get('/ventas', [VentasController::class, 'index'])->name('ventas.index');
 Route::get('/ventas/create', [VentasController::class, 'create'])->name('ventas.create');
@@ -35,6 +44,7 @@ Route::post('/ventas', [VentasController::class, 'store'])->name('ventas.store')
 Route::get('ventas/{id}/edit', [VentasController::class, 'edit'])->name('ventas.edit');
 Route::delete('ventas/{id}', [VentasController::class, 'destroy'])->name('ventas.destroy');
 Route::put('/ventas/{venta}', [VentasController::class, 'update'])->name('ventas.update');
+Route::get('/ventas/pdf/{id}', [VentasController::class, 'generarPdf'])->name('ventas.pdf');
 
 
 
@@ -45,6 +55,8 @@ Route::post('/articulos', [ArticulosController::class, 'store'])->name('articulo
 Route::get('/articulos/{articulos}/edit', [ArticulosController::class, 'edit'])->name('articulos.edit');
 Route::delete('/articulos/{articulos}', [ArticulosController::class, 'destroy'])->name('articulos.destroy');
 Route::put('/articulos/{articulos}', [ArticulosController::class, 'update'])->name('articulos.update');
+
+Route::get('/consulta-articulo', [ArticulosController::class, 'consultaArticulo'])->name('articulos.consultaArticulo');
 
 
 Route::get('/tipoarticulos', [TipoArticulosController::class, 'index'])->name('tipoarticulos.index');
@@ -61,6 +73,8 @@ Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.st
 Route::get('/clientes/{cliente}/edit', [ClienteController::class, 'edit'])->name('clientes.edit');
 Route::delete('/clientes/{cliente}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
 Route::put('/clientes/{cliente}', [ClienteController::class, 'update'])->name('clientes.update');
+
+Route::get('/consulta-cliente', [ClienteController::class, 'consultaCliente'])->name('clientes.consultaCliente');
 
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('proveedores.index');
 Route::get('/proveedores/create', [ProveedoresController::class, 'create'])->name('proveedores.create');

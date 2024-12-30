@@ -10,6 +10,7 @@ use App\Models\DetalleVentas;
 use App\Models\TipoArticulos;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class VentasController extends Controller
 {
@@ -18,7 +19,7 @@ class VentasController extends Controller
      */
     public function index()
     {
-        $ventas = Ventas::with(['cliente', 'proveedor', 'tipoArticulo'])->get();
+        $ventas = Ventas::with(['cliente', 'productos.tipoArticulo'])->get();
     return view('ventas.index', compact('ventas'));
     }
 
@@ -36,70 +37,60 @@ class VentasController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
-            'fecha' => 'required|date',
-            'articulos' => 'required|array',
-            'articulos.*.producto_id' => 'required|exists:articulos,id',
-            'articulos.*.cantidad' => 'required|integer|min:1',
+{
+    // Validar los datos del formulario
+    $request->validate([
+        'cliente_id' => 'required|exists:clientes,id',
+        'articulos' => 'required|array',
+        'articulos.*.producto_id' => 'required|exists:articulos,id',
+        'articulos.*.cantidad' => 'required|integer|min:1',
+    ]);
+
+    // Tomar el tipo_articulo_id del primer producto seleccionado (si todos tienen el mismo tipo)
+    $primerProducto = Articulos::find($request->articulos[0]['producto_id']);
+    $tipo_articulo_id = $primerProducto->cod_tipo_articulo; // Suponiendo que 'cod_tipo_articulo' es el campo adecuado
+
+    // Crear la venta
+    $venta = Ventas::create([
+        'cliente_id' => $request->cliente_id,
+        'tipo_articulo_id' => $tipo_articulo_id, // Ahora lo obtienes dinámicamente
+        'fecha_hora' => now(),
+        'total' => 0,  // Se calculará más tarde
+        'estado' => 'pendiente', // O el estado que corresponda
+    ]);
+
+    // Inicializamos el subtotal de la venta
+    $subtotal = 0;
+
+    // Crear los detalles de la venta y calcular el total
+    foreach ($request->articulos as $articulo) {
+        $producto = Articulos::find($articulo['producto_id']);
+        $precio = $producto->precio_venta;
+        $cantidad = $articulo['cantidad'];
+        $precio_total = $precio * $cantidad;
+
+        // Agregar el producto a la venta
+        $venta->productos()->attach($producto, [
+            'cantidad' => $cantidad,
+            'precio' => $precio,
+            'precio_total' => $precio_total,
         ]);
 
-        // Iniciar la transacción
-        DB::beginTransaction();
+        // Acumulamos el subtotal
+        $subtotal += $precio_total;
+    }
 
-        try {
-            // Crear la venta
-            $venta = Ventas::create([
-                'cliente_id' => $request->cliente_id,
-                'proveedor_id' => 1, // Asumimos un proveedor por defecto
-                'tipo_articulo_id' => 1, // Tipo de artículo por defecto, o lo puedes pasar por el formulario
-                'fecha_hora' => $request->fecha,
-                'total' => 0, // Lo actualizamos más tarde
-                'estado' => 'pendiente', // Puedes cambiar este estado según corresponda
-            ]);
+    // Calcular el IGV (si aplica)
+    $igv = $subtotal * 0.18;  // Ejemplo con un 18% de IGV
+    $total = $subtotal + $igv;
 
-            $subtotal = 0;
+    // Actualizar el total en la venta
+    $venta->update(['total' => $total]);
 
-            // Crear los detalles de la venta
-            foreach ($request->articulos as $articulo) {
-                $producto = Articulos::find($articulo['producto_id']);
-                $precio = $producto->precio_venta;
-                $cantidad = $articulo['cantidad'];
-                $precio_total = $precio * $cantidad;
+    // Redirigir o devolver respuesta
+    return redirect()->route('ventas.index')->with('success', 'Venta registrada exitosamente.');
+}
 
-                // Crear el detalle de la venta
-                DetalleVentas::create([
-                    'venta_id' => $venta->id,
-                    'producto_id' => $articulo['producto_id'],
-                    'cantidad' => $cantidad,
-                    'precio' => $precio,
-                    'precio_total' => $precio_total,
-                ]);
-
-                $subtotal += $precio_total;
-            }
-
-            // Calcular el IGV (18%)
-            $igv = $subtotal * 0.18;
-            $total = $subtotal + $igv;
-
-            // Actualizar el total de la venta
-            $venta->update([
-                'total' => $total,
-            ]);
-
-            // Confirmar la transacción
-            DB::commit();
-
-            return redirect()->route('ventas.index')->with('success', 'Venta generada con éxito');
-        } catch (\Exception $e) {
-            // Si ocurre un error, revertimos la transacción
-            DB::rollBack();
-            return back()->with('error', 'Ocurrió un error al generar la venta');
-        }
-        
-    }        
 
     /**
      * Display the specified resource.
@@ -113,78 +104,96 @@ class VentasController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit($id)
-{
-    // Recupera la venta y las relaciones necesarias
-    $venta = Ventas::with(['cliente', 'proveedor', 'tipoArticulo', 'articulos'])->findOrFail($id);
-    $venta->fecha_hora = \Carbon\Carbon::parse($venta->fecha_hora);
-
-    // Calcular el subtotal
-    $subtotal = 0;
-    foreach ($venta->articulos as $articulo) {
-        $subtotal += $articulo->precio_venta * $articulo->cantidad;  // Multiplicar precio de venta por cantidad
+    {
+        // Recuperar la venta con sus relaciones necesarias
+        $venta = Ventas::with(['cliente', 'tipoArticulo', 'productos'])->findOrFail($id);
+        $venta->fecha_hora = \Carbon\Carbon::parse($venta->fecha_hora);
+    
+        // Calcular el subtotal
+        $subtotal = 0;
+        foreach ($venta->productos as $producto) {
+            $subtotal += $producto->pivot->precio * $producto->pivot->cantidad;
+        }
+    
+        // Calcular el IGV (18%)
+        $igv = $subtotal * 0.18;
+    
+        // Calcular el total
+        $total = $subtotal + $igv;
+    
+        // Cargar los productos, clientes y tipo de artículos
+        $productos = Articulos::all(); 
+        $clientes = Cliente::all();
+        $proveedores = Proveedores::all(); 
+        $tipoArticulos = TipoArticulos::all(); 
+    
+        // Pasar los datos a la vista
+        return view('ventas.edit', compact('venta', 'subtotal', 'igv', 'total', 'clientes', 'proveedores', 'tipoArticulos', 'productos'));
     }
-
-    // Calcular el IGV (18%)
-    $igv = $subtotal * 0.18;
-
-    // Calcular el total
-    $total = $subtotal + $igv;
-
-    // Cargar los productos para los dropdowns
-    $productos = Articulos::all(); // Obtén todos los productos disponibles
-
-    // Cargar los datos adicionales como los clientes, proveedores y tipo de artículos
-    $clientes = Cliente::all(); // Todos los clientes
-    $proveedores = Proveedores::all(); // Todos los proveedores
-    $tipoArticulos = TipoArticulos::all(); // Todos los tipos de artículos
-
-    // Pasar los datos a la vista
-    return view('ventas.edit', compact('venta', 'subtotal', 'igv', 'total', 'clientes', 'proveedores', 'tipoArticulos', 'productos'));
-}
-
-
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, $id)
 {
-    // Encuentra la venta a actualizar
-    $venta = Ventas::with(['articulos'])->findOrFail($id);
+    // Validar los datos del formulario
+    $request->validate([
+        'cliente_id' => 'required|exists:clientes,id',
+        'articulos' => 'required|array',
+        'articulos.*.producto_id' => 'required|exists:articulos,id',
+        'articulos.*.cantidad' => 'required|integer|min:1',
+    ]);
 
-    // Actualiza la venta (otros campos como fecha, cliente, proveedor, etc.)
-    $venta->fecha_hora = \Carbon\Carbon::parse($request->input('fecha_hora'));
-    $venta->cliente_id = $request->input('cliente_id');
-    $venta->proveedor_id = $request->input('proveedor_id');
-    $venta->tipo_articulo_id = $request->input('tipo_articulo_id');
-    // Añadir cualquier otro campo necesario para actualizar
+    // Buscar la venta a actualizar
+    $venta = Ventas::findOrFail($id);
 
-    // Guardar la venta
-    $venta->save();
+    // Tomar el tipo_articulo_id del primer producto seleccionado (si todos tienen el mismo tipo)
+    $primerProducto = Articulos::find($request->articulos[0]['producto_id']);
+    $tipo_articulo_id = $primerProducto->cod_tipo_articulo;
 
-    // Actualizar los productos asociados a la venta
-    foreach ($request->input('articulos') as $index => $articuloData) {
-        $articulo = $venta->articulos[$index];  // Obtener el articulo correspondiente
+    // Actualizar la venta
+    $venta->update([
+        'cliente_id' => $request->cliente_id,
+        'tipo_articulo_id' => $tipo_articulo_id, // Ahora lo obtienes dinámicamente
+        'fecha_hora' => now(), // Si se requiere una actualización de fecha
+        'total' => 0,  // El total se actualizará más tarde
+        'estado' => $request->estado, // Si deseas actualizar el estado
+    ]);
 
-        $articulo->producto_id = $articuloData['producto_id'];
-        $articulo->cantidad = $articuloData['cantidad'];
-        $articulo->total = $articuloData['cantidad'] * $articulo->producto->precio_venta;  // Calcular el total
-
-        // Guardar los cambios del articulo
-        $articulo->save();
-    }
-
-    // Volver a calcular el subtotal, IGV, y total
+    // Inicializamos el subtotal de la venta
     $subtotal = 0;
-    foreach ($venta->articulos as $articulo) {
-        $subtotal += $articulo->total;
+
+    // Eliminar los detalles de la venta previos y agregar los nuevos
+    $venta->productos()->detach();  // Eliminar los productos previos relacionados a la venta
+
+    // Crear los detalles de la venta y calcular el total
+    foreach ($request->articulos as $articulo) {
+        $producto = Articulos::find($articulo['producto_id']);
+        $precio = $producto->precio_venta;
+        $cantidad = $articulo['cantidad'];
+        $precio_total = $precio * $cantidad;
+
+        // Agregar el producto a la venta
+        $venta->productos()->attach($producto, [
+            'cantidad' => $cantidad,
+            'precio' => $precio,
+            'precio_total' => $precio_total,
+        ]);
+
+        // Acumulamos el subtotal
+        $subtotal += $precio_total;
     }
 
-    $igv = $subtotal * 0.18;
+    // Calcular el IGV (si aplica)
+    $igv = $subtotal * 0.18;  // Ejemplo con un 18% de IGV
     $total = $subtotal + $igv;
 
-    // Pasar los datos a la vista
-    return redirect()->route('ventas.index')->with('success', 'Venta actualizada correctamente');
+    // Actualizar el total en la venta
+    $venta->update(['total' => $total]);
+
+    // Redirigir al índice de ventas con un mensaje de éxito
+    return redirect()->route('ventas.index')->with('success', 'Venta actualizada exitosamente.');
 }
+
+
+    
 
     /**
      * Remove the specified resource from storage.
@@ -200,4 +209,15 @@ class VentasController extends Controller
     // Redirigir con un mensaje de éxito
     return redirect()->route('ventas.index')->with('success', 'Venta eliminada correctamente.');
 }
+
+public function generarPdf($id)
+    {
+        $venta = Ventas::with(['cliente', 'productos'])->findOrFail($id);
+
+    // Retorna un PDF generado a partir de una vista Blade
+    $pdf = Pdf::loadView('ventas.pdf', compact('venta'));
+
+    // Descarga el archivo PDF con un nombre personalizado
+    return $pdf->download('venta_'.$id.'.pdf');
+    }
 }

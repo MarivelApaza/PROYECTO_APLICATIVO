@@ -246,6 +246,30 @@
                     <li><a class="dropdown-item" href="{{ route('ventas.create') }}">Agregar Venta</a></li>
                 </ul>
             </li>
+
+            <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="{{ route('usuarios.index') }}" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-hospital"></i>
+                <span>Usuarios</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{{ route('usuarios.index') }}">Lista Usuarios</a></li>
+            </ul>
+        </li>
+        <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-hospital"></i>
+        <span>Consultas</span>
+    </a>
+    <!-- Un solo <ul> con ambos elementos -->
+    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="{{ route('clientes.consultaCliente') }}">Consultas por Cliente</a></li>
+        <li><a class="dropdown-item" href="{{ route('articulos.consultaArticulo') }}">Consultas por Productos</a></li>
+    </ul>
+</li>
+
+
+
             
             </ul>
         </div>
