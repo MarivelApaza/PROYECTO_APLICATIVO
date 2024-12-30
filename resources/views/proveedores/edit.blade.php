@@ -1,13 +1,13 @@
-<!-- resources/views/proveedores/edit.blade.php -->
-
 @extends('layouts.app')
 
 @section('content')
+
 <div class="container">
+
     <h1>Editar Proveedor</h1>
 
     <!-- Formulario de edición -->
-    <form action="{{ route('proveedores.update', $proveedor->id) }}" method="POST">
+    <form action="{{ route('proveedores.update', ['proveedor' => $proveedor->id]) }}" method="POST">
         @csrf
         @method('PUT') <!-- Método PUT para actualización -->
 
@@ -31,7 +31,8 @@
             <input type="text" name="direccion" id="direccion" class="form-control" value="{{ old('direccion', $proveedor->direccion) }}" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <button type="submit" class="btn btn-primary">Actualizar Proveedor</button>
     </form>
 </div>
+
 @endsection

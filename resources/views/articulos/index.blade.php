@@ -34,7 +34,7 @@
                     <td>{{ $articulo->precio_costo }}</td>
                     <td>{{ $articulo->stock }}</td>
                     <td>{{ $articulo->tipoArticulo->descripcion }}</td> <!-- Relación con tipo_articulo -->
-                    <td>{{ $articulo->proveedor->nombre }}</td> <!-- Relación con proveedor -->
+                    <td>{{ $articulo->proveedor->proveedor }}</td> <!-- Relación con proveedor -->
                     <td>{{ $articulo->fecha_ingreso }}</td>
                     <td>
                         <!-- Botón para editar -->
@@ -46,6 +46,7 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                         </form>
+
                     </td>
                 </tr>
             @endforeach

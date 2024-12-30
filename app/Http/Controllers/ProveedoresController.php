@@ -13,8 +13,6 @@ class ProveedoresController extends Controller
     public function index()
     {
         $proveedores = Proveedores::all();
-
-        // Retornar la vista con los proveedores
         return view('proveedores.index', compact('proveedores'));
     }
 
@@ -61,43 +59,44 @@ class ProveedoresController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Proveedores $proveedores)
+    public function edit(Proveedores $proveedor)
     {
-        return view('proveedores.edit', compact('proveedores'));
+        return view('proveedores.edit', compact('proveedor'));
     }
+
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Proveedores $proveedores)
-    {
-        $request->validate([
-            'proveedor' => 'required|max:100',
-            'contacto' => 'required|max:100',
-            'telefono' => 'required|max:15',
-            'direccion' => 'required|max:100',
-        ]);
+    public function update(Request $request, Proveedores $proveedor)
+{
+    // Validar los datos del formulario
+    $validatedData = $request->validate([
+        'proveedor' => 'required|string|max:255',
+        'contacto' => 'required|string|max:255',
+        'telefono' => 'required|string|max:15',
+        'direccion' => 'required|string|max:255',
+    ]);
 
-        // Actualizar los datos del proveedor
-        $proveedores->update([
-            'proveedor' => $request->proveedor,
-            'contacto' => $request->contacto,
-            'telefono' => $request->telefono,
-            'direccion' => $request->direccion,
-        ]);
+    // Actualizar los datos del proveedor
+    $proveedor->update($validatedData);
 
-        // Redirigir a la lista de proveedores con un mensaje de éxito
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado correctamente.');
-    }
+    // Redirigir al usuario con un mensaje de éxito
+    return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado correctamente.');
+}
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Proveedores $proveedores)
+    public function destroy(Proveedores $proveedor)
     {
-        $proveedores->delete();
+        // Eliminar el proveedor
+        $proveedor->delete();
 
         // Redirigir a la lista de proveedores con un mensaje de éxito
         return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado correctamente.');
     }
+
 }

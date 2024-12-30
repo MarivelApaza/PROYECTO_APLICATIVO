@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100); // Nombre del cliente, con longitud de 100 caracteres.
+            $table->string('tipo_documento', 20);
+            $table->string('num_documento', 20);
             $table->string('apellidos', 100);
             $table->string('telefono', 15); // Teléfono, ajustado a un tamaño adecuado para números telefónicos.
             $table->string('direccion', 200); // Dirección, con longitud de 200 caracteres.

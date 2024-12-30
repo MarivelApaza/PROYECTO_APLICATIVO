@@ -19,11 +19,12 @@ class Articulos extends Model
         'cod_tipo_articulo',
         'cod_proveedor',
         'fecha_ingreso',
+        'ventas_id',
     ];
 
     public function tipoArticulo()
     {
-        return $this->belongsTo(TipoArticulos::class, 'cod_tipoarticulo', 'id');
+        return $this->belongsTo(TipoArticulos::class, 'cod_tipo_articulo', 'id');
     }
 
     // Relación con el modelo Proveedor (suponiendo que tienes este modelo)
@@ -31,4 +32,17 @@ class Articulos extends Model
     {
         return $this->belongsTo(Proveedores::class, 'cod_proveedor', 'id');
     }
+
+    public function detallesVentas()
+    {
+        return $this->hasMany(DetalleVentas::class);
+    }
+
+    public function venta()
+    {
+        
+            return $this->belongsToMany(Ventas::class, 'venta_producto', 'producto_id', 'venta_id');
+        
+    }
+
 }

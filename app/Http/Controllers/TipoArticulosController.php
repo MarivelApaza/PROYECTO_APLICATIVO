@@ -54,28 +54,30 @@ class TipoArticulosController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(TipoArticulos $tipoArticulos)
-    {
-        return view('tipoarticulos.edit', compact('tipoArticulos'));
-    }
+{
+    return view('tipoarticulos.edit', compact('tipoArticulos'));
+}
+
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, TipoArticulos $tipoArticulos)
-    {
-        $request->validate([
-            'descripcion' => 'required|string|max:255',
-        ]);
+{
+    $request->validate([
+        'descripcion' => 'required|string|max:255',
+    ]);
 
-        // Actualización del tipo de artículo
-        $tipoArticulos->update([
-            'descripcion' => $request->descripcion,
-        ]);
+    // Actualizar el tipo de artículo
+    $tipoArticulos->update([
+        'descripcion' => $request->descripcion,
+    ]);
 
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('tipoarticulos.index')->with('success', 'Tipo de artículo actualizado con éxito');
-    
-    }
+    // Redirigir con mensaje de éxito
+    return redirect()->route('tipoarticulos.index')->with('success', 'Tipo de artículo actualizado con éxito');
+}
+
 
     /**
      * Remove the specified resource from storage.

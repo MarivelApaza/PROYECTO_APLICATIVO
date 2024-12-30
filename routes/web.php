@@ -28,19 +28,31 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 
-
-
 Route::resource('ventas', VentasController::class);
+Route::get('/ventas', [VentasController::class, 'index'])->name('ventas.index');
+Route::get('/ventas/create', [VentasController::class, 'create'])->name('ventas.create');
+Route::post('/ventas', [VentasController::class, 'store'])->name('ventas.store');
+Route::get('ventas/{id}/edit', [VentasController::class, 'edit'])->name('ventas.edit');
+Route::delete('ventas/{id}', [VentasController::class, 'destroy'])->name('ventas.destroy');
+Route::put('/ventas/{venta}', [VentasController::class, 'update'])->name('ventas.update');
+
+
 
 
 Route::get('/articulos', [ArticulosController::class, 'index'])->name('articulos.index');
 Route::get('/articulos/create', [ArticulosController::class, 'create'])->name('articulos.create');
 Route::post('/articulos', [ArticulosController::class, 'store'])->name('articulos.store');
-Route::get('/articulos/{articulo}/edit', [ArticulosController::class, 'edit'])->name('articulos.edit');
-Route::delete('/articulos/{articulo}', [ArticulosController::class, 'destroy'])->name('articulos.destroy');
-Route::put('/articulos/{articulo}', [ArticulosController::class, 'update'])->name('articulos.update');
+Route::get('/articulos/{articulos}/edit', [ArticulosController::class, 'edit'])->name('articulos.edit');
+Route::delete('/articulos/{articulos}', [ArticulosController::class, 'destroy'])->name('articulos.destroy');
+Route::put('/articulos/{articulos}', [ArticulosController::class, 'update'])->name('articulos.update');
 
-Route::resource('tipoarticulos', TipoArticulosController::class);
+
+Route::get('/tipoarticulos', [TipoArticulosController::class, 'index'])->name('tipoarticulos.index');
+Route::get('/tipoarticulos/create', [TipoArticulosController::class, 'create'])->name('tipoarticulos.create');
+Route::post('/tipoarticulos', [TipoArticulosController::class, 'store'])->name('tipoarticulos.store');
+Route::get('/tipoarticulos/{tipoArticulos}/edit', [TipoArticulosController::class, 'edit'])->name('tipoarticulos.edit');
+Route::put('/tipoarticulos/{tipoArticulos}', [TipoArticulosController::class, 'update'])->name('tipoarticulos.update');
+Route::delete('/tipoarticulos/{tipoArticulos}', [TipoArticulosController::class, 'destroy'])->name('tipoarticulos.destroy');
 
 
 Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
@@ -56,4 +68,5 @@ Route::post('/proveedores', [ProveedoresController::class, 'store'])->name('prov
 Route::get('/proveedores/{proveedor}/edit', [ProveedoresController::class, 'edit'])->name('proveedores.edit');
 Route::delete('/proveedores/{proveedor}', [ProveedoresController::class, 'destroy'])->name('proveedores.destroy');
 Route::put('/proveedores/{proveedor}', [ProveedoresController::class, 'update'])->name('proveedores.update');
+
 

@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('articulos', function (Blueprint $table) {
             $table->id();
             $table->string('descripcion', 30);
-            $table->integer('precio_venta');
-            $table->integer('precio_costo');
+            $table->decimal('precio_venta', 10, 2);
+            $table->decimal('precio_costo', 10, 2);
             $table->integer('stock');
             $table->unsignedBigInteger('cod_tipo_articulo');  // Relacionada con 'tipo_articulos'
             $table->unsignedBigInteger('cod_proveedor');      // Relacionada con 'proveedors'            
             $table->string('fecha_ingreso', 15);
+            $table->unsignedBigInteger('ventas_id')->nullable();
 
             $table->timestamps();
         });

@@ -87,6 +87,7 @@
                     </div>
                 </div>
 
+
                 <div class="row mb-3">
                     <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
 
@@ -108,6 +109,27 @@
                         <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
                     </div>
                 </div>
+
+                <div class="row mb-3">
+                    <label for="roles_id" class="col-md-4 col-form-label text-md-end">{{ __('Rol') }}</label>
+
+                    <div class="col-md-6">
+                        <select id="roles_id" class="form-control @error('roles_id') is-invalid @enderror" name="roles_id" required>
+                            @foreach (\App\Models\Roles::all() as $role) 
+                                <option value="{{ $role->id }}" {{ old('roles_id') == $role->id ? 'selected' : '' }}>
+                                    {{ $role->nombre }} <!-- Verifica que el nombre de la columna en la base de datos sea 'nombre' -->
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('roles_id')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                </div>
+
 
                 <div class="row mb-0">
                     <div class="col-md-6 offset-md-4">

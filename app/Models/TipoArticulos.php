@@ -15,6 +15,11 @@ class TipoArticulos extends Model
     // Relación inversa de artículos
     public function articulos()
     {
-        return $this->hasMany(Articulo::class, 'cod_tipo_articulo', 'id');
+        return $this->hasMany(Articulos::class, 'cod_tipo_articulo', 'id');
+    }
+
+    public function ventas()
+    {
+        return $this->hasMany(Ventas::class);
     }
 }

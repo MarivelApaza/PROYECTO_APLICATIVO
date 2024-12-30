@@ -18,8 +18,8 @@
         </div>
 
         <div class="mb-3">
-            <label for="fecha" class="form-label">Fecha de Venta</label>
-            <input type="date" name="fecha" id="fecha" class="form-control" required>
+            <label for="fecha_hora" class="form-label">Fecha y Hora de Venta</label>
+            <input type="datetime-local" name="fecha_hora" id="fecha_hora" class="form-control" required>
         </div>
 
         <div class="mb-3">
@@ -34,22 +34,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="productoItem">
+                <tr class="productoItem">
+            <td>
+                <select name="detalle_ventas[0][producto_id]" class="form-control" required>
+                    <option value="">Selecciona un producto</option>
+                    @foreach($productos as $producto)
+                        <option value="{{ $producto->id }}" data-precio="{{ $producto->precio_venta }}">
+                            {{ $producto->descripcion }}
+                        </option>
+                    @endforeach
+                </select>
+            </td>
                         <td>
-                            <select name="articulos[0][producto_id]" class="form-control" required>
-                                <option value="">Selecciona un producto</option>
-                                @foreach($productos as $producto)
-                                    <option value="{{ $producto->id }}" data-precio="{{ $producto->precio_venta }}">
-                                        {{ $producto->descripcion }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <input type="number" name="detalle_ventas[0][cantidad]" class="form-control cantidad" min="1" value="1" required>
                         </td>
                         <td>
-                            <input type="number" name="articulos[0][cantidad]" class="form-control cantidad" min="1" value="1" required>
-                        </td>
-                        <td>
-                            <input type="text" name="articulos[0][precio_total]" class="form-control precio_total" readonly>
+                            <input type="text" name="detalle_ventas[0][precio_total]" class="form-control precio_total" readonly>
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
@@ -73,6 +73,26 @@
         <div class="mb-3">
             <label for="total" class="form-label">Total</label>
             <input type="text" id="total" class="form-control" name="total" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="proveedor_id" class="form-label">Proveedor</label>
+            <select name="proveedor_id" id="proveedor_id" class="form-control" required>
+                <option value="">Selecciona un proveedor</option>
+                @foreach($proveedores as $proveedor)
+                    <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="tipo_articulo_id" class="form-label">Tipo de Artículo</label>
+            <select name="tipo_articulo_id" id="tipo_articulo_id" class="form-control" required>
+                <option value="">Selecciona un tipo de artículo</option>
+                @foreach($tipoArticulos as $tipoArticulo)
+                    <option value="{{ $tipoArticulo->id }}">{{ $tipoArticulo->descripcion }}</option>
+                @endforeach
+            </select>
         </div>
 
         <button type="submit" class="btn btn-success">Guardar Venta</button>
@@ -102,20 +122,20 @@
 
             // Agregar contenido a las celdas
             celdaProducto.innerHTML = `
-                <select name="articulos[${productoCount}][producto_id]" class="form-control" required>
+                <select name="detalle_ventas[${productoCount}][producto_id]" class="form-control" required>
                     <option value="">Selecciona un producto</option>
-                    @foreach($productos as $producto)
-                        <option value="{{ $producto->id }}" data-precio="{{ $producto->precio_venta }}">
-                            {{ $producto->descripcion }}
+                    @foreach($articulos as $articulo)
+                        <option value="{{ $articulo->id }}" data-precio="{{ $articulo->precio_venta }}">
+                            {{ $articulo->descripcion }}
                         </option>
                     @endforeach
                 </select>
             `;
             celdaCantidad.innerHTML = `
-                <input type="number" name="articulos[${productoCount}][cantidad]" class="form-control cantidad" min="1" value="1" required>
+                <input type="number" name="detalle_ventas[${productoCount}][cantidad]" class="form-control cantidad" min="1" value="1" required>
             `;
             celdaTotal.innerHTML = `
-                <input type="text" name="articulos[${productoCount}][precio_total]" class="form-control precio_total" readonly>
+                <input type="text" name="detalle_ventas[${productoCount}][precio_total]" class="form-control precio_total" readonly>
             `;
             celdaAcciones.innerHTML = `
                 <button type="button" class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
@@ -146,7 +166,7 @@
 
             let precioTotales = document.querySelectorAll('.precio_total');
             let cantidades = document.querySelectorAll('.cantidad');
-            let productos = document.querySelectorAll('select[name^="articulos"]');
+            let productos = document.querySelectorAll('select[name^="detalle_ventas"]');
 
             productos.forEach((producto, index) => {
                 let precio = parseFloat(producto.selectedOptions[0].getAttribute('data-precio') || 0);
@@ -170,7 +190,7 @@
 
         // Actualizar los totales cuando cambie la cantidad o el producto
         document.addEventListener('change', function(event) {
-            if (event.target.classList.contains('cantidad') || event.target.matches('select[name^="articulos"]')) {
+            if (event.target.classList.contains('cantidad') || event.target.matches('select[name^="detalle_ventas"]')) {
                 actualizarTotales();
             }
         });

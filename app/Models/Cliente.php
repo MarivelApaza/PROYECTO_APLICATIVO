@@ -18,6 +18,12 @@ class Cliente extends Model
         'telefono',
         'direccion',
         'ciudad',
+        'tipo_documento', // Campo tipo de documento
+        'num_documento',  // Campo número de documento
     ];
     
+    public function ventas()
+    {
+        return $this->hasMany(Ventas::class);
+    }
 }

@@ -23,4 +23,9 @@ class Proveedores extends Model
     {
         return $this->hasMany(Articulos::class, 'cod_proveedor', 'id');
     }
+
+    public function ventas()
+    {
+        return $this->hasMany(Ventas::class);
+    }
 }

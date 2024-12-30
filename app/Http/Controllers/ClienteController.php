@@ -35,6 +35,8 @@ class ClienteController extends Controller
             'telefono' => 'required|string|max:15',
             'direccion' => 'required|string|max:255',
             'ciudad' => 'required|string|max:100',
+            'tipo_documento' => 'required|string|max:20', // Validar tipo de documento
+            'num_documento' => 'required|string|max:20',   // Validar número de documento
         ]);
     
         // Crear el nuevo cliente
@@ -44,6 +46,8 @@ class ClienteController extends Controller
         $cliente->telefono = $request->input('telefono');
         $cliente->direccion = $request->input('direccion');
         $cliente->ciudad = $request->input('ciudad');
+        $cliente->tipo_documento = $request->input('tipo_documento'); // Asignar tipo de documento
+        $cliente->num_documento = $request->input('num_documento');   // Asignar número de documento
     
         // Guardar el cliente en la base de datos
         $cliente->save();
@@ -57,7 +61,7 @@ class ClienteController extends Controller
      */
     public function show(Cliente $cliente)
     {
-        
+        // Lógica para mostrar detalles del cliente (si es necesario)
     }
 
     /**
@@ -79,6 +83,8 @@ class ClienteController extends Controller
             'telefono' => 'required|string|max:15',
             'direccion' => 'required|string|max:255',
             'ciudad' => 'required|string|max:100',
+            'tipo_documento' => 'required|string|max:20', // Validar tipo de documento
+            'num_documento' => 'required|string|max:20',   // Validar número de documento
         ]);
     
         // Actualizar los datos del cliente
@@ -87,6 +93,8 @@ class ClienteController extends Controller
         $cliente->telefono = $request->input('telefono');
         $cliente->direccion = $request->input('direccion');
         $cliente->ciudad = $request->input('ciudad');
+        $cliente->tipo_documento = $request->input('tipo_documento'); // Actualizar tipo de documento
+        $cliente->num_documento = $request->input('num_documento');   // Actualizar número de documento
     
         // Guardar los cambios
         $cliente->save();
@@ -102,7 +110,8 @@ class ClienteController extends Controller
     {
         $cliente->delete(); // Eliminar el cliente
 
-    // Redirigir a la lista de clientes con un mensaje de éxito
-    return redirect()->route('clientes.index')->with('success', 'Cliente eliminado exitosamente');
-}
+        // Redirigir a la lista de clientes con un mensaje de éxito
+        return redirect()->route('clientes.index')->with('success', 'Cliente eliminado exitosamente');
+    }
+
 }

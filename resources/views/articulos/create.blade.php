@@ -37,22 +37,33 @@
     </div>
 
     <div class="form-group">
-        <label for="cod_tipoarticulo">Tipo de Artículo</label>
-        <select name="cod_tipoarticulo" id="cod_tipoarticulo" class="form-control">
+        <label for="cod_tipo_articulo">Tipo de Artículo</label>
+        <select name="cod_tipo_articulo" id="cod_tipo_articulo" class="form-control" required>
             @foreach ($tipoArticulos as $tipo)
-                <option value="{{ $tipo->id }}">{{ $tipo->descripcion }}</option>
+                <option value="{{ $tipo->id }}" {{ old('cod_tipo_articulo') == $tipo->id ? 'selected' : '' }}>
+                    {{ $tipo->descripcion }}
+                </option>
             @endforeach
         </select>
     </div>
+
+
 
     <div class="form-group">
         <label for="cod_proveedor">Proveedor</label>
         <select name="cod_proveedor" id="cod_proveedor" class="form-control">
             @foreach ($proveedores as $proveedor)
-                <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor }}</option>
             @endforeach
         </select>
     </div>
+
+    <div class="form-group">
+        <label for="fecha_ingreso">Fecha de Ingreso</label>
+        <input type="date" name="fecha_ingreso" id="fecha_ingreso" class="form-control" value="{{ old('fecha_ingreso') }}" required>
+    </div>
+
+
 <br> <br>
     <button type="submit" class="btn btn-primary">Guardar Artículo</button>
 </form>

@@ -16,7 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('cliente_id');
             $table->unsignedBigInteger('proveedor_id');
             $table->unsignedBigInteger('tipo_articulo_id');
+            $table->dateTime('fecha_hora');
             $table->decimal('total', 10, 2);
+            $table->string('estado', 20);
             $table->timestamps();
         });
     }

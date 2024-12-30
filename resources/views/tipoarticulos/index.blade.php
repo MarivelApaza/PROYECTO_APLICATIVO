@@ -21,15 +21,16 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($tipoArticulos as $tipoArticulo)
+            @foreach ($tipoArticulos as $tipoArticulos)
                 <tr>
-                    <td>{{ $tipoArticulo->descripcion }}</td>
+                    <td>{{ $tipoArticulos->descripcion }}</td>
                     <td>
                         <!-- Botón para editar -->
-                        <a href="{{ route('tipoarticulos.edit', $tipoArticulo->id) }}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{{ route('tipoarticulos.edit', $tipoArticulos->id) }}" class="btn btn-warning btn-sm">Editar</a>
+
 
                         <!-- Formulario para eliminar tipo de artículo -->
-                        <form action="{{ route('tipoarticulos.destroy', $tipoArticulo->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este tipo de artículo?');">
+                        <form action="{{ route('tipoarticulos.destroy', $tipoArticulos->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este tipo de artículo?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>

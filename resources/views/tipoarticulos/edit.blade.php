@@ -23,16 +23,18 @@
     @endif
 
     <!-- Formulario de edición -->
-    <form action="{{ route('tipoarticulos.update', $tipoArticulo->id) }}" method="POST">
-        @csrf
-        @method('PUT') <!-- Método PUT para actualización -->
+    <form action="{{ route('tipoarticulos.update', $tipoArticulos->id) }}" method="POST">
 
-        <div class="form-group">
-            <label for="descripcion">Descripción</label>
-            <input type="text" name="descripcion" id="descripcion" class="form-control" value="{{ old('descripcion', $tipoArticulo->descripcion) }}" required>
-        </div>
+    @csrf
+    @method('PUT')
 
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    </form>
+    <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <input type="text" name="descripcion" id="descripcion" class="form-control" value="{{ old('descripcion', $tipoArticulos->descripcion) }}" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+</form>
+
 </div>
 @endsection
